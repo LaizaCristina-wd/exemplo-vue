@@ -1,15 +1,16 @@
 <script setup>
-import { ref } from "vue"
+import { reactive, computed, ref} from "vue"
 
 const novaTarefa = ref("")
 const tarefas = ref([])
+
 
 function adicionarTarefa(){
   if(novaTarefa.value.trim() === "") return
 
   tarefas.value.push({ text: novaTarefa.value, concluida: false
-
    })
+   
   novaTarefa.value = ""
 }
 
@@ -20,12 +21,36 @@ function alternarStatus(index){
   tarefas.value[index].concluida =
     !tarefas.value[index].concluida
 }
+const filtro = reactive({
+  status: "todas"
+})
+
+const tarefasFiltradas = computed(() => {
+  if (filtro.status === "concluidas") {
+    return tarefas.value.filter(t => t.concluida)
+  }
+
+  if (filtro.status === "pendentes") {
+    return tarefas.value.filter(t => !t.concluida)
+  }
+
+  return tarefas.value
+})
 </script>
 
 <template>
   <div class="container">
     <h1>Lista de tarefas</h1>
+  <div class="filtros">
+      <label for="filtroStatus">Filtrar tarefas:</label>
 
+      <select id="filtroStatus" v-model="filtro.status">
+        <option value="todas">Todas</option>
+        <option value="concluidas">Concluídas</option>
+        <option value="pendentes">Pendentes</option>
+      </select>
+    </div>
+    
     <input 
       v-model="novaTarefa"
       placeholder="Digite uma tarefa"
@@ -36,10 +61,9 @@ function alternarStatus(index){
     </button>
 
     <ul>
-      <li v-for="(tarefa, index) in tarefas" :key="index">
-
+      <li v-for="(tarefa, index) in tarefasFiltradas" :key="index"> 
   <span
-    :class="{ concluida: tarefa.concluida }"
+    :class="{ concluida: tarefa.concluida }" 
     @click="alternarStatus(index)"
   >
         {{ tarefa.text}}
@@ -50,6 +74,7 @@ function alternarStatus(index){
 
       </li>
     </ul>
+ 
   </div>
 </template>
 
